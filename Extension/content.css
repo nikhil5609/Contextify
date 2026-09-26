@@ -175,3 +175,182 @@
 .contextify-chat-send-btn:hover {
   background-color: #33334d;
 }
+
+
+#contextify-chat-popup {
+  width: 420px;
+  height: 520px;
+
+  background: white;
+  border-radius: 14px;
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  font-family: Arial, sans-serif;
+
+  z-index: 999999;
+}
+
+/* Header */
+
+.contextify-header {
+  height: 48px;
+  min-height: 48px;
+
+  background: #17152b;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 16px;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: grab;
+}
+
+.contextify-close-btn {
+  border: none;
+  background: transparent;
+  color: white;
+
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Messages area */
+
+.contextify-chat-messages {
+  flex: 1;
+
+  padding: 14px;
+
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  background: #ffffff;
+}
+
+/* All messages */
+
+.contextify-msg {
+  max-width: 88%;
+
+  padding: 11px 14px;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  line-height: 1.55;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* User */
+
+.contextify-msg-user {
+  align-self: flex-end;
+
+  background: #17152b;
+  color: white;
+
+  border-bottom-right-radius: 4px;
+}
+
+/* Bot */
+
+.contextify-msg-bot {
+  align-self: flex-start;
+
+  background: #f1f2f6;
+  color: #202124;
+
+  border-bottom-left-radius: 4px;
+
+  max-width: 92%;
+}
+
+/* Bot formatting */
+
+.contextify-msg-bot strong {
+  font-weight: 700;
+  color: #111;
+}
+
+.contextify-msg-bot br {
+  line-height: 1.8;
+}
+
+/* Loading */
+
+.contextify-msg-loading {
+  align-self: flex-start;
+
+  background: #f1f2f6;
+  color: #666;
+
+  font-style: italic;
+}
+
+/* Input */
+
+.contextify-chat-input-row {
+  display: flex;
+
+  gap: 8px;
+
+  padding: 10px;
+
+  border-top: 1px solid #ddd;
+
+  background: white;
+}
+
+.contextify-chat-input {
+  flex: 1;
+
+  height: 40px;
+
+  border: 1px solid #aaa;
+  border-radius: 8px;
+
+  padding: 0 10px;
+
+  font-size: 14px;
+
+  outline: none;
+}
+
+.contextify-chat-input:focus {
+  border-color: #17152b;
+}
+
+.contextify-chat-send-btn {
+  width: 64px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #17152b;
+  color: white;
+
+  cursor: pointer;
+
+  font-weight: 500;
+}
+
+.contextify-chat-send-btn:hover {
+  opacity: 0.9;
+}

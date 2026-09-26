@@ -93,17 +93,32 @@ function removeChatPopup() {
 }
 
 function appendMessage(role, text) {
-  // role: "user" | "bot" | "loading"
   const messagesEl = chatPopup.querySelector(".contextify-chat-messages");
-  if(role == 'user' || role == 'bot'){
-    messages.push(role+": "+text)
+
+  if (role === "user" || role === "bot") {
+    messages.push(role + ": " + text);
   }
+
   const msgEl = document.createElement("div");
   msgEl.className = `contextify-msg contextify-msg-${role}`;
-  msgEl.textContent = text;
+
+  if (role === "bot") {
+    // Basic markdown formatting
+    let formattedText = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n/g, "<br>");
+
+    msgEl.innerHTML = formattedText;
+  } else {
+    msgEl.textContent = text;
+  }
 
   messagesEl.appendChild(msgEl);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+
   return msgEl;
 }
 
