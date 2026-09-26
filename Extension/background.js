@@ -1,8 +1,10 @@
 console.log("Contextify background service worker loaded.");
 
-const BACKEND_URL = "http://localhost:5000/api/explain";
+const BACKEND_URL = "https://contextify-lsxx.onrender.com/api/explain";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  
+  
   if (message.type === "EXPLAIN_TEXT") {
     fetch(BACKEND_URL, {
       method: "POST",
@@ -13,6 +15,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .then((data) => {
         if (data.error) {
           sendResponse({ status: "error", message: data.error });
+          console.log("a3",message);
         } else {
           sendResponse({ status: "success", explanation: data.explanation });
         }

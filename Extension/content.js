@@ -1,7 +1,18 @@
 let explainButton = null;
 let chatPopup = null;
-
-
+let popupUI = `
+    <div class="contextify-header">
+      <span>Contextify</span>
+      <button class="contextify-close-btn">&times;</button>
+    </div>
+    <div class="contextify-chat-messages"></div>
+    <div class="contextify-chat-input-row">
+      <input type="text" class="contextify-chat-input" placeholder="Ask a follow-up..." />
+      <button class="contextify-chat-send-btn">Send</button>
+    </div>
+  `
+let messages = [];
+  
 function removeExplainButton() {
   if (explainButton) {
     explainButton.remove();
@@ -52,7 +63,7 @@ function makeDraggable(popupEl, handleEl) {
     offsetY = e.clientY - rect.top;
 
     handleEl.style.cursor = "grabbing";
-    e.preventDefault(); // avoid text selection while dragging
+    e.preventDefault();
   });
 
   document.addEventListener("mousemove", (e) => {
@@ -84,7 +95,9 @@ function removeChatPopup() {
 function appendMessage(role, text) {
   // role: "user" | "bot" | "loading"
   const messagesEl = chatPopup.querySelector(".contextify-chat-messages");
-
+  if(role == 'user' || role == 'bot'){
+    messages.push(role+": "+text)
+  }
   const msgEl = document.createElement("div");
   msgEl.className = `contextify-msg contextify-msg-${role}`;
   msgEl.textContent = text;
@@ -105,44 +118,13 @@ function openChatPopup(selectedText, rect) {
   chatPopup.style.top = `${top}px`;
   chatPopup.style.left = `${left}px`;
 
-  chatPopup.innerHTML = `
-    <div class="contextify-header">
-      <span>Contextify</span>
-      <button class="contextify-close-btn">&times;</button>
-    </div>
-    <div class="contextify-chat-messages"></div>
-    <div class="contextify-chat-input-row">
-      <input type="text" class="contextify-chat-input" placeholder="Ask a follow-up..." />
-      <button class="contextify-chat-send-btn">Send</button>
-    </div>
-  `;
+  chatPopup.innerHTML = popupUI;
 
   document.body.appendChild(chatPopup);
-
   chatPopup.querySelector(".contextify-close-btn").addEventListener("click", removeChatPopup);
   makeDraggable(chatPopup, chatPopup.querySelector(".contextify-header"));
-
   appendMessage("user", selectedText);
-
-  const loadingEl = appendMessage("loading", "Thinking...");
-
-  chrome.runtime.sendMessage(
-    { type: "EXPLAIN_TEXT", text: selectedText },
-    (response) => {
-      loadingEl.remove();
-
-      if (chrome.runtime.lastError) {
-        appendMessage("bot", "Something went wrong. Please try again.");
-        return;
-      }
-
-      if (response.status === "success") {
-        appendMessage("bot", response.explanation);
-      } else {
-        appendMessage("bot", response.message || "Could not get an explanation.");
-      }
-    }
-  );
+  sendMessageToBackend(selectedText)
 
   const inputEl = chatPopup.querySelector(".contextify-chat-input");
   const sendBtn = chatPopup.querySelector(".contextify-chat-send-btn");
@@ -150,11 +132,9 @@ function openChatPopup(selectedText, rect) {
   function sendFollowUp() {
     const value = inputEl.value.trim();
     if (!value) return;
-
     appendMessage("user", value);
     inputEl.value = "";
-
-    appendMessage("bot", "Follow-up chat is coming soon!");
+    sendMessageToBackend(value)
   }
 
   sendBtn.addEventListener("click", sendFollowUp);
@@ -217,3 +197,26 @@ document.addEventListener("mousedown", (e) => {
 window.addEventListener("scroll", () => {
   removeExplainButton();
 }, true);
+
+
+function sendMessageToBackend(selectedText){
+  const loadingEl = appendMessage("loading", "Thinking...");
+  chrome.runtime.sendMessage(
+    { type: "EXPLAIN_TEXT", text: messages },
+    (response) => {
+      console.log(response);
+      loadingEl.remove();
+
+      if (chrome.runtime.lastError) {
+        appendMessage("bot", "Something went wrong. Please try again.");
+        return;
+      }
+
+      if (response.status === "success") {
+        appendMessage("bot", response.explanation);
+      } else {
+        appendMessage("bot", response.message || "Could not get an explanation.");
+      }
+    }
+  );
+}

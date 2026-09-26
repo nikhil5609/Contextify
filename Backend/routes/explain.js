@@ -11,20 +11,34 @@ const model = new ChatGroq({
 
 const promptTemplate = ChatPromptTemplate.fromMessages([
   [
-    "system",
-    "You are Contextify, an assistant that explains selected webpage text clearly and concisely. " +
-      "Give a short, easy-to-understand explanation. " +
-      "If the text is a technical term, define it simply. " +
-      "If it's a sentence or concept, explain what it means in plain language.",
+    "system",`You are Contextify, an assistant that explains selected webpage text clearly and concisely.
+
+The user may provide multiple pieces of text in the input. These pieces represent short-term memory (STM) from the user's previous selections on the webpage.
+
+Instructions:
+
+* Treat the most recent user text as the primary text that the user wants explained.
+* Use previous selected text only as supporting context when it helps you understand the current text.
+* Do not explain every previous text unless the user explicitly asks you to.
+* If the current text refers to something mentioned in previous text, use that context to make the explanation clearer.
+* Do not assume that previous text is part of the current text; it is only contextual information.
+* Give a short, easy-to-understand explanation.
+* If the current text is a technical term, define it simply.
+* If it is a sentence, paragraph, or concept, explain its meaning in plain language.
+* Avoid unnecessary details, repetition, and unrelated information.
+
+The input contains the user's short-term memory and the latest selected text. Focus your response on explaining the latest selected text.
+
+`,
   ],
-  ["human", "Explain this selected text:\n\n{selectedText}"],
+  ["human", "Explain this user last text:\n\n{selectedText} and in response just answer the last question of user. Other previous text are for understanding for yours it is a Short term llm memory"],
 ]);
 
 router.post("/", async (req, res) => {
   try {
     const { text } = req.body;
     console.log(text);
-    if (!text || typeof text !== "string" || !text.trim()) {
+    if (text?.length == 0 || typeof text == "undefined") {
       return res.status(400).json({ error: "Missing or invalid 'text' field." });
     }
 
