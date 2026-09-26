@@ -12,7 +12,7 @@ let popupUI = `
     </div>
   `
 let messages = [];
-  
+
 function removeExplainButton() {
   if (explainButton) {
     explainButton.remove();
@@ -89,6 +89,7 @@ function removeChatPopup() {
   if (chatPopup) {
     chatPopup.remove();
     chatPopup = null;
+    messages = [];
   }
 }
 
@@ -170,6 +171,22 @@ function handleSelectionChange() {
     return;
   }
 
+
+  if (messages.length == 0) {
+    let node = selection.anchorNode;
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      node = node.parentElement;
+    }
+
+    const container = node.closest("p, li, article, section, div");
+
+    const surroundingText = container
+      ? container.innerText.trim()
+      : "";
+    messages.push("Reference Text: " + surroundingText)
+  }
+
   if (
     selection.anchorNode &&
     ((explainButton && explainButton.contains(selection.anchorNode)) ||
@@ -214,7 +231,7 @@ window.addEventListener("scroll", () => {
 }, true);
 
 
-function sendMessageToBackend(selectedText){
+function sendMessageToBackend(selectedText) {
   const loadingEl = appendMessage("loading", "Thinking...");
   chrome.runtime.sendMessage(
     { type: "EXPLAIN_TEXT", text: messages },
