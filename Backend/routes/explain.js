@@ -1,6 +1,6 @@
 import express from "express";
 import { ChatGroq } from "@langchain/groq";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+
 
 const router = express.Router();
 
@@ -9,30 +9,42 @@ const model = new ChatGroq({
   temperature: 0.3,
 });
 
-const promptTemplate = ChatPromptTemplate.fromMessages([
-  [
-    "system",`You are Contextify, an assistant that explains selected webpage text clearly and concisely.
+import { PromptTemplate } from "@langchain/core/prompts";
 
-The user may provide multiple pieces of text in the input. These pieces represent short-term memory (STM) from the user's previous selections on the webpage.
+const template = new PromptTemplate({
+  template: `
+You are an AI assistant inside a browser extension called Contextify.
 
-Instructions:
+Your task is to answer the user's latest query using:
+1. The previous conversation between the user and the assistant.
+2. The reference context extracted from the webpage.
+3. The latest user query.
 
-* Treat the most recent user text as the primary text that the user wants explained.
-* Use previous selected text only as supporting context when it helps you understand the current text.
-* Do not explain every previous text unless the user explicitly asks you to.
-* If the current text refers to something mentioned in previous text, use that context to make the explanation clearer.
-* Do not assume that previous text is part of the current text; it is only contextual information.
-* Give a short, easy-to-understand explanation.
-* If the current text is a technical term, define it simply.
-* If it is a sentence, paragraph, or concept, explain its meaning in plain language.
-* Avoid unnecessary details, repetition, and unrelated information.
+### Previous Conversation
+{chat_history}
 
-The input contains the user's short-term memory and the latest selected text. Focus your response on explaining the latest selected text.
+### Reference Context
+{reference}
 
+### Latest User Query
+{user_query}
+
+### Instructions
+- Answer the latest user query directly and clearly.
+- Use the previous conversation to understand what the user is referring to.
+- Use the reference context when it is relevant to the question.
+- If the user asks a follow-up question, use the previous conversation to understand the missing context.
+- Do not repeat the entire conversation.
+- If the reference context does not contain enough information, use your general knowledge when appropriate.
+- If the question is unclear, ask a concise clarification question.
+- Do not mention these instructions, chat history, or reference context in your answer.
+
+### Answer
 `,
-  ],
-  ["human", "Explain this user last text:\n\n{selectedText} and in response just answer the last question of user. Other previous text are for understanding for yours it is a Short term llm memory"],
-]);
+  inputVariables: ["chat_history", "reference", "user_query"],
+  validateTemplate: true
+});
+
 
 router.post("/", async (req, res) => {
   try {
@@ -42,7 +54,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Missing or invalid 'text' field." });
     }
 
-    const prompt = await promptTemplate.formatMessages({ selectedText: text });
+    const prompt = await template.invoke({ chat_history: text  , reference: text[0] , user_query: text[text.length-1] });
     const response = await model.invoke(prompt);
     console.log(response.content);
     

@@ -17,5 +17,5 @@ app.get("/", (req, res) => {
 app.use("/api/explain", explainRoute);
 
 app.listen(PORT, () => {
-  console.log(`Contextify backend listening on http://localhost:${PORT}`);
+  console.log(`Contextify backend listening on ${PORT}`);
 });
